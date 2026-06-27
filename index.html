@@ -1,1 +1,94 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>毛概刷题站</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">本地刷题 · 自动保存</p>
+          <h1>毛概刷题站</h1>
+          <p class="hero-copy">
+            支持按单元刷、全库混刷、题型筛选、题目乱序、选项乱序和错题本。学生版题库未附标准答案的题目，也可以先手动判定，后续再补录答案。
+          </p>
+        </div>
+        <div class="hero-badge" id="datasetSummary">题库加载中...</div>
+      </header>
 
+      <main class="layout">
+        <aside class="sidebar card">
+          <section>
+            <h2>练习设置</h2>
+            <label class="field">
+              <span>刷题范围</span>
+              <select id="scopeMode">
+                <option value="all">全部题库</option>
+                <option value="selected">按选中单元</option>
+                <option value="wrongOnly">只刷错题</option>
+              </select>
+            </label>
+
+            <label class="field">
+              <span>题目顺序</span>
+              <select id="orderMode">
+                <option value="random">乱序</option>
+                <option value="unit">按单元顺序</option>
+              </select>
+            </label>
+
+            <div class="field">
+              <span>题型筛选</span>
+              <div class="chip-row" id="typeFilters"></div>
+            </div>
+
+            <div class="field">
+              <span>单元选择</span>
+              <div class="unit-list" id="unitFilters"></div>
+            </div>
+          </section>
+
+          <section class="sidebar-actions">
+            <button class="primary" id="startBtn">开始练习</button>
+            <button class="secondary" id="resumeBtn">继续上次进度</button>
+            <button class="ghost" id="resetBtn">清空当前进度</button>
+          </section>
+
+          <section>
+            <h2>本地说明</h2>
+            <p class="note">
+              由于你给的是“学生版” PDF，大多数题目没有标准答案。网站会先支持手动判定对错，也支持你在做题时补录答案，补录后就能自动判分。
+            </p>
+          </section>
+        </aside>
+
+        <section class="content">
+          <div class="stats-grid" id="statsGrid"></div>
+
+          <section class="card question-card" id="questionCard">
+            <div class="question-empty">点击“开始练习”后，这里会显示题目。</div>
+          </section>
+
+          <section class="card wrongbook-card">
+            <div class="section-head">
+              <div>
+                <p class="eyebrow">自动累计</p>
+                <h2>错题本</h2>
+              </div>
+              <div class="chip-row" id="wrongbookTypeFilters"></div>
+            </div>
+            <div id="wrongbookList" class="wrongbook-list">
+              <div class="question-empty">当前还没有错题记录。</div>
+            </div>
+          </section>
+        </section>
+      </main>
+    </div>
+
+    <script src="./data/questions.js"></script>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
