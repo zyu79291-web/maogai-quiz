@@ -163,7 +163,7 @@ function createSession(questions) {
     },
     queue: randomizedIds.map((question) => ({
       id: question.id,
-      optionOrder: shuffle(question.options.map((option) => option.label)),
+      optionOrder: shuffle(getQuestionOptions(question).map((option) => option.label)),
     })),
     currentIndex: 0,
     results: {},
@@ -178,28 +178,29 @@ function renderQuestion() {
     return;
   }
 
+  const displayQuestion = getRenderableQuestion(question);
   const queueItem = state.currentSession.queue[state.currentSession.currentIndex];
-  normalizeQueueItemOptions(queueItem, question);
+  normalizeQueueItemOptions(queueItem, displayQuestion);
   const result = state.currentSession.results[question.id];
   const shuffledOptions = queueItem.optionOrder
-    .map((label) => question.options.find((option) => option.label === label))
+    .map((label) => displayQuestion.options.find((option) => option.label === label))
     .filter(Boolean);
 
   const selection = result?.selected ?? [];
   const canSubmit =
-    question.type === "judgment" ? selection.length === 1 : selection.length > 0;
+    displayQuestion.type === "judgment" ? selection.length === 1 : selection.length > 0;
 
   elements.questionCard.innerHTML = `
     <div class="question-meta">
-      <span class="meta-badge">${question.unit}</span>
-      <span class="meta-badge">${TYPE_LABELS[question.type]}</span>
+      <span class="meta-badge">${displayQuestion.unit}</span>
+      <span class="meta-badge">${TYPE_LABELS[displayQuestion.type]}</span>
       <span class="meta-badge">第 ${state.currentSession.currentIndex + 1} / ${state.currentSession.queue.length} 题</span>
-      <span class="meta-badge">${question.answer ? "可自动判分" : "需手动判定或补录答案"}</span>
+      <span class="meta-badge">${displayQuestion.answer ? "可自动判分" : "需手动判定或补录答案"}</span>
     </div>
-    <h2 class="question-stem">${escapeHtml(question.stem)}</h2>
-    ${question.hint ? `<div class="feedback-box"><p><strong>题干内提示：</strong>${escapeHtml(question.hint)}</p></div>` : ""}
+    <h2 class="question-stem">${escapeHtml(displayQuestion.stem)}</h2>
+    ${displayQuestion.hint ? `<div class="feedback-box"><p><strong>题干内提示：</strong>${escapeHtml(displayQuestion.hint)}</p></div>` : ""}
     <div class="option-list">
-      ${renderOptionButtons(question, shuffledOptions, selection, result)}
+      ${renderOptionButtons(displayQuestion, shuffledOptions, selection, result)}
     </div>
     <div class="question-actions">
       <button class="secondary" id="submitAnswerBtn" ${result?.status || !canSubmit ? "disabled" : ""}>提交答案</button>
@@ -207,11 +208,11 @@ function renderQuestion() {
       <button class="secondary" id="prevQuestionBtn" ${state.currentSession.currentIndex === 0 ? "disabled" : ""}>上一题</button>
       <button class="secondary" id="nextQuestionBtn" ${state.currentSession.currentIndex >= state.currentSession.queue.length - 1 ? "disabled" : ""}>下一题</button>
     </div>
-    ${renderFeedback(question, result)}
-    ${renderAnswerEditor(question)}
+    ${renderFeedback(displayQuestion, result)}
+    ${renderAnswerEditor(displayQuestion)}
   `;
 
-  bindQuestionEvents(question, shuffledOptions);
+  bindQuestionEvents(displayQuestion, shuffledOptions);
 }
 
 function renderOptionButtons(question, options, selection, result) {
@@ -235,12 +236,13 @@ function renderOptionButtons(question, options, selection, result) {
   }
 
   return options
-    .map((option) => {
+    .map((option, index) => {
       const isActive = selection.includes(option.label);
       const statusClass = getChoiceStatus(question, result, option.label);
+      const displayLabel = getDisplayLabelByIndex(index);
       return `
         <button class="option-btn ${isActive ? "active" : ""} ${statusClass}" data-choice="${option.label}">
-          <span class="option-label">${option.label}</span>
+          <span class="option-label">${displayLabel}</span>
           <span>${escapeHtml(option.text)}</span>
         </button>
       `;
@@ -249,7 +251,7 @@ function renderOptionButtons(question, options, selection, result) {
 }
 
 function getChoiceStatus(question, result, label) {
-  if (!result || !question.answer) {
+  if (!result?.status || !question.answer) {
     return "";
   }
 
@@ -295,12 +297,13 @@ function renderFeedback(question, result) {
 
 function renderAnswerEditor(question) {
   const editorId = `editor-${question.id}`;
+  const labelMap = getOptionDisplayLabelMap(question);
   const labels = question.type === "judgment"
     ? [
         { value: "true", text: "正确" },
         { value: "false", text: "错误" },
       ]
-    : question.options.map((option) => ({ value: option.label, text: `${option.label}. ${option.text}` }));
+    : question.options.map((option) => ({ value: option.label, text: `${labelMap[option.label] ?? option.label}. ${option.text}` }));
 
   const inputType = question.type === "multiple" ? "checkbox" : "radio";
   const existing = question.answer ? (Array.isArray(question.answer) ? question.answer : [question.answer]) : [];
@@ -651,7 +654,7 @@ function shuffle(items) {
 }
 
 function normalizeQueueItemOptions(queueItem, question) {
-  const validLabels = question.options.map((option) => option.label);
+  const validLabels = getQuestionOptions(question).map((option) => option.label);
   if (!validLabels.length) {
     return queueItem;
   }
@@ -666,6 +669,78 @@ function normalizeQueueItemOptions(queueItem, question) {
 
   queueItem.optionOrder = shuffle(validLabels);
   return queueItem;
+}
+
+function getQuestionOptions(question) {
+  if (question?.options?.length) {
+    return question.options;
+  }
+
+  const fallback = parseInlineOptionsFromStem(question?.stem ?? "");
+  return fallback.options;
+}
+
+function getRenderableQuestion(question) {
+  const fallback = parseInlineOptionsFromStem(question.stem);
+  const options = question.options?.length ? question.options : fallback.options;
+  const stem = question.options?.length ? question.stem : fallback.stem;
+
+  return {
+    ...question,
+    stem,
+    options,
+  };
+}
+
+function parseInlineOptionsFromStem(stem) {
+  const compact = String(stem ?? "").replace(/\s+/g, " ").trim();
+  const markerPattern = /(^|\s)([A-H])(?=\s*[^\s])/g;
+  const matches = [...compact.matchAll(markerPattern)];
+
+  if (matches.length < 2) {
+    return { stem: compact, options: [] };
+  }
+
+  const firstMarkerIndex = matches[0].index + matches[0][1].length;
+  const parsedStem = compact.slice(0, firstMarkerIndex).trim();
+  const options = matches.map((match, index) => {
+    const label = match[2];
+    const start = match.index + match[0].length;
+    const end = index + 1 < matches.length ? matches[index + 1].index : compact.length;
+    return {
+      label,
+      text: compact.slice(start, end).trim(),
+    };
+  }).filter((option) => option.text);
+
+  if (options.length < 2) {
+    return { stem: compact, options: [] };
+  }
+
+  return {
+    stem: parsedStem,
+    options,
+  };
+}
+
+function getDisplayLabelByIndex(index) {
+  return String.fromCharCode(65 + index);
+}
+
+function getOptionDisplayLabelMap(question) {
+  if (!question?.options?.length) {
+    return {};
+  }
+
+  const queueItem = state.currentSession?.queue?.find((item) => item.id === question.id);
+  const orderedLabels = Array.isArray(queueItem?.optionOrder) && queueItem.optionOrder.length
+    ? queueItem.optionOrder
+    : question.options.map((option) => option.label);
+
+  return orderedLabels.reduce((map, label, index) => {
+    map[label] = getDisplayLabelByIndex(index);
+    return map;
+  }, {});
 }
 
 function escapeHtml(value) {
@@ -684,7 +759,10 @@ function formatSelectedAnswer(selected, question) {
   if (question.type === "judgment") {
     return selected.map((item) => (item === "true" ? "正确" : "错误")).join(" / ");
   }
-  return selected.join("、");
+  const labelMap = getOptionDisplayLabelMap(question);
+  return selected
+    .map((item) => labelMap[item] ?? item)
+    .join("、");
 }
 
 function formatCanonicalAnswer(question) {
@@ -694,7 +772,11 @@ function formatCanonicalAnswer(question) {
   if (question.type === "judgment") {
     return question.answer === "true" ? "正确" : "错误";
   }
-  return Array.isArray(question.answer) ? question.answer.join("、") : question.answer;
+  const labelMap = getOptionDisplayLabelMap(question);
+  const answers = Array.isArray(question.answer) ? question.answer : [question.answer];
+  return answers
+    .map((item) => labelMap[item] ?? item)
+    .join("、");
 }
 
 function togglePracticeType(typeKey) {

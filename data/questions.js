@@ -1568,11 +1568,11 @@ window.__QUESTION_DATA__ = {
         }
       ],
       "answer": [
-        "D"
+        "A"
       ],
-      "answerSource": "docx",
+      "answerSource": "manual-correction",
       "hint": null,
-      "explanation": "在政治思想领域，解决人民内部矛盾的具体方针是实行'百花齐放、百家争鸣'的方针。"
+      "explanation": "在政治思想领域，解决人民内部矛盾的具体方针是实行“团结-批评-团结”的方针；“百花齐放、百家争鸣”适用于科学文化领域。"
     },
     {
       "id": "unit-01-single-016",
@@ -3287,11 +3287,11 @@ window.__QUESTION_DATA__ = {
         }
       ],
       "answer": [
-        "D"
+        "A"
       ],
-      "answerSource": "docx",
+      "answerSource": "manual-correction",
       "hint": null,
-      "explanation": "毛泽东所说的民族资产阶级的老毛病是指两面性。"
+      "explanation": "毛泽东所说民族资产阶级“从娘肚子里带出来的老毛病”，特指其软弱性（妥协性）。"
     },
     {
       "id": "unit-02-single-026",
@@ -3763,13 +3763,12 @@ window.__QUESTION_DATA__ = {
         }
       ],
       "answer": [
-        "A",
-        "C",
-        "D"
+        "B",
+        "C"
       ],
-      "answerSource": "docx",
+      "answerSource": "manual-correction",
       "hint": null,
-      "explanation": "革命统一战线包含：工农联盟；工人阶级同农民阶级、广大知识分子及其他劳动者的联盟；与民族资产阶级的联盟。"
+      "explanation": "中国共产党领导的革命统一战线包含两个联盟：工人阶级同农民阶级、广大知识分子及其他劳动者的联盟，以及工人阶级和非劳动人民的联盟。"
     },
     {
       "id": "unit-02-multiple-008",
@@ -4343,11 +4342,11 @@ window.__QUESTION_DATA__ = {
         }
       ],
       "answer": [
-        "D"
+        "A"
       ],
-      "answerSource": "docx",
+      "answerSource": "manual-correction",
       "hint": null,
-      "explanation": "民族资产阶级的两面性：作为剥削阶级是被消灭对象；作为可接受领导的社会力量又是可以团结和改造的对象。"
+      "explanation": "新民主主义社会民族资产阶级的两面性，是指既有剥削工人取得利润的一面，又有拥护中国共产党领导、愿意接受社会主义改造的一面。"
     },
     {
       "id": "unit-03-single-006",
@@ -4508,11 +4507,11 @@ window.__QUESTION_DATA__ = {
         }
       ],
       "answer": [
-        "C"
+        "B"
       ],
-      "answerSource": "docx",
+      "answerSource": "manual-correction",
       "hint": null,
-      "explanation": "实行公私合营后，企业具有了社会主义因素。"
+      "explanation": "题干描述的是国家资本主义高级形式下的个别企业公私合营阶段，其企业性质属于半社会主义性质。"
     },
     {
       "id": "unit-03-single-011",
@@ -11282,13 +11281,13 @@ window.__QUESTION_DATA__ = {
         }
       ],
       "answer": [
-        "A",
         "B",
+        "C",
         "D"
       ],
-      "answerSource": "docx",
+      "answerSource": "manual-correction",
       "hint": null,
-      "explanation": "始终是推动先进生产力发展和社会全面进步根本力量的是：科技、工人、知识分子。"
+      "explanation": "根据“三个代表”重要思想，工人、农民和知识分子始终是推动我国先进生产力发展和社会全面进步的根本力量。"
     },
     {
       "id": "unit-07-multiple-007",
