@@ -189,6 +189,7 @@ function renderQuestion() {
   const selection = result?.selected ?? [];
   const canSubmit =
     displayQuestion.type === "judgment" ? selection.length === 1 : selection.length > 0;
+  const needsManualSubmit = displayQuestion.type === "multiple";
 
   elements.questionCard.innerHTML = `
     <div class="question-meta">
@@ -203,7 +204,7 @@ function renderQuestion() {
       ${renderOptionButtons(displayQuestion, shuffledOptions, selection, result)}
     </div>
     <div class="question-actions">
-      <button class="secondary" id="submitAnswerBtn" ${result?.status || !canSubmit ? "disabled" : ""}>提交答案</button>
+      ${needsManualSubmit ? `<button class="secondary" id="submitAnswerBtn" ${result?.status || !canSubmit ? "disabled" : ""}>提交答案</button>` : ""}
       <button class="ghost" id="showAnswerEditorBtn">补录这题答案</button>
       <button class="secondary" id="prevQuestionBtn" ${state.currentSession.currentIndex === 0 ? "disabled" : ""}>上一题</button>
       <button class="secondary" id="nextQuestionBtn" ${state.currentSession.currentIndex >= state.currentSession.queue.length - 1 ? "disabled" : ""}>下一题</button>
@@ -333,7 +334,11 @@ function bindQuestionEvents(question) {
   elements.questionCard.querySelectorAll("[data-choice]").forEach((button) => {
     button.addEventListener("click", () => {
       updateSelection(question, button.dataset.choice);
-      renderQuestion();
+      if (question.type === "multiple") {
+        renderQuestion();
+        return;
+      }
+      submitAnswer(question);
     });
   });
 
